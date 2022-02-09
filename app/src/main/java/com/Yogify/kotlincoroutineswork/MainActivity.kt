@@ -1,10 +1,12 @@
 package com.Yogify.kotlincoroutineswork
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import com.Yogify.kotlincoroutineswork.ViewModule.ActivityWithViewModule
 import kotlinx.coroutines.*
 import kotlin.concurrent.thread
 
@@ -88,6 +90,16 @@ class MainActivity : AppCompatActivity() {
         return 1024
     }
 
+    suspend fun CallAPIFollowersInsta(): Int {
+        delay(1000)
+        return 1023
+    }
+
+    suspend fun CallAPIFollowersFb(): Int {
+        delay(1000)
+        return 220
+    }
+
     // Normal Launch Function
     suspend fun fun_CallCoroutines() {
         // Job Object to Check Coroutines State
@@ -103,21 +115,77 @@ class MainActivity : AppCompatActivity() {
 
     suspend fun fun_CallCoroutinesAsynk() {
         // We Used Asynk where we need result for other operations
-        var totalfolower = 0
+
         var defferobject = CoroutineScope(Dispatchers.Main).async {
             CallAPIFollowers()
         }
-        defferobject.join()
-
         Log.d("Folloers", defferobject.await().toString())
     }
 
-    fun fun_CallJobObject(view: View) {
+    suspend fun fun_CallTwoCoroutinesAsynk() {
+        // We Used Asynk where we need result for other operations
+
+        var instaobject = CoroutineScope(Dispatchers.Main).async {
+            CallAPIFollowersInsta()
+        }
+        var fbobject = CoroutineScope(Dispatchers.Main).async {
+            CallAPIFollowersFb()
+        }
+        Log.d(
+            "Folloers",
+            "Insta Followers ${instaobject.await().toString()} Fb Followers ${
+                fbobject.await().toString()
+            }"
+        )
+    }
+
+    suspend fun fun_CallTwoCoroutinesParellel() {
+        // Two Api Called In Parrel
         CoroutineScope(Dispatchers.Main).launch {
-            fun_CallCoroutinesAsynk()
+            var insta = async { CallAPIFollowersInsta() }
+            var fb = async { CallAPIFollowersFb() }
+            Log.d(
+                "Folloers",
+                "Insta Followers ${insta.await().toString()} Fb Followers ${fb.await().toString()}"
+            )
+
         }
     }
 
+    suspend fun fun_CallWithContext() {
+
+        // Run in Sequnce One by One
+
+        Log.d("WithContext", "With Start")
+
+        withContext(Dispatchers.IO) {
+            var insta = async { CallAPIFollowersInsta() }
+            var fb = async { CallAPIFollowersFb() }
+            Log.d(
+                "WithContext",
+                "Insta Followers ${insta.await().toString()} Fb Followers ${fb.await().toString()}"
+            )
+            Log.d("WithContext", "With context Running")
+
+        }
+
+        Log.d("WithContext", "With context Ended")
+
+    }
+
+    fun fun_CallJobObject(view: View) {
+
+        CoroutineScope(Dispatchers.Main).launch {
+            // fun_CallCoroutinesAsynk()
+            // fun_CallTwoCoroutinesAsynk()
+            // fun_CallTwoCoroutinesParellel()
+            fun_CallWithContext()
+        }
+    }
+
+    fun fun_startviewmoduleactivity(view: View) {
+        startActivity(Intent(this,ActivityWithViewModule::class.java))
+    }
 
 
 }
