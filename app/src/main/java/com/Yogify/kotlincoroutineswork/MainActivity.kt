@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
         txxview = findViewById<TextView>(R.id.txt_counter)
         Log.e("ThredOnWorking", "${Thread.currentThread().name}")
 
+
     }
 
     fun fun_updateCounter(view: View) {
@@ -71,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun fun_CallSuspendFunction(view: View) {
+        // Lecture 4
         CoroutineScope(Dispatchers.Main).launch {
             Task()
         }
@@ -78,4 +80,43 @@ class MainActivity : AppCompatActivity() {
             Task2()
         }
     }
+
+    //
+
+    suspend fun CallAPIFollowers(): Int {
+        delay(1000)
+        return 1024
+    }
+
+    // Normal Launch Function
+    suspend fun fun_CallCoroutines() {
+        // Job Object to Check Coroutines State
+        // We Used Launch where we don't need result for further operation
+        var totalfolower = 0
+        var job = CoroutineScope(Dispatchers.Main).launch {
+            totalfolower = CallAPIFollowers()
+        }
+        // if you used join then next line will be execute after comletion of coroutines
+        job.join()
+        Log.d("Folloers", totalfolower.toString())
+    }
+
+    suspend fun fun_CallCoroutinesAsynk() {
+        // We Used Asynk where we need result for other operations
+        var totalfolower = 0
+        var defferobject = CoroutineScope(Dispatchers.Main).async {
+            CallAPIFollowers()
+        }
+        defferobject.join()
+
+        Log.d("Folloers", defferobject.await().toString())
+    }
+
+    fun fun_CallJobObject(view: View) {
+        CoroutineScope(Dispatchers.Main).launch {
+            fun_CallCoroutinesAsynk()
+        }
+    }
+
+
 }
